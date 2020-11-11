@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>edit</title>
+</head>
+<body>
+  <a href="/">返回首页</a>
+  {{myList.gender}}
+  <form action="/edit" method="post">
+    <input type="hidden" value="{{myList.id}}" name="id">
+    <label for="">姓名</label>
+    <input type="text" value="{{myList.name}}" name="name">
+    <label for="">年龄</label>
+    <input type="text" name="age" value="{{myList.age}}">
+    <input type="radio" id="nan" name="gender" value="1" checked="{{myList.gender == 1}}">
+    <label for="nan">男</label>
+    <input type="radio" id="nv" name="gender" value="0"  checked="{{myList.gender == 0? true}}">
+    <label for="nv">女</label>
+    <button type="submit" >修改</button>
+  </form>
+</body>
+</html>

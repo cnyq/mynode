@@ -12,5 +12,5 @@ const dogs = mongoose.model('dogs', { name: String });
 
 // const kitty = new Cat({ name: 'Zildjian' });
 // kitty.save().then(() => console.log('meow'));
-const boba = new dogs({ name: 'boba1' });
+const boba = new dogs({ name: '111' });
 boba.save().then(() => console.log('wa'));
