@@ -14,9 +14,9 @@
     <input type="text" value="{{myList.name}}" name="name">
     <label for="">年龄</label>
     <input type="text" name="age" value="{{myList.age}}">
-    <input type="radio" id="nan" name="gender" value="1" checked="{{myList.gender == 1}}">
+    <input type="radio" id="nan" name="gender" value="1" checked="{{myList.gender == 1? true: false}}">
     <label for="nan">男</label>
-    <input type="radio" id="nv" name="gender" value="0"  checked="{{myList.gender == 0? true}}">
+    <input type="radio" id="nv" name="gender" value="0" checked="{{myList.gender == 0? true: false}}">
     <label for="nv">女</label>
     <button type="submit" >修改</button>
   </form>

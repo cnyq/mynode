@@ -17,8 +17,9 @@ router.get('/add', (req, res) => {
 })
 
 router.post('/add', (req, res) => {
-  let _data = new Student(req.body)
-  _data.save().then(() => console.log('保存成功'));
+  new Student(req.body).save().then(() => console.log('保存成功'));
+  // let _data = new Student(req.body)
+  // _data.save().then(() => console.log('保存成功'));
   res.redirect('/')
 })
 
@@ -38,5 +39,11 @@ router.post('/edit', (req, res) => {
   res.redirect('/')
 })
 
+router.get('/delete', (req, res) => {
+  Student.findByIdAndRemove(req.query.id, err => {
+    if (err) return res.status(500).send('server error.')
+    res.redirect('/')
+  })
+})
 
 module.exports = router
