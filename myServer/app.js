@@ -8,6 +8,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 const router = require('./router/index')
+const cms = require('./router/cms/index')
 const user = require('./router/user')
 
 app.use(bodyParser.json({ limit: '50mb' }))
@@ -17,6 +18,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')))
 
 app.use('/',router)
 app.use('/api',user)
+app.use('/cms',cms)
 // app.use(function (req, res, next) {
 //   next(createError(404));
 // });

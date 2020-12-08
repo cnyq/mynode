@@ -11,7 +11,7 @@ const collect_nfo = new Schema({
   }
 })
 
-const user_base = new Schema({
+const user_db = new Schema({
   nick_name: {
     type: String,
     required: true
@@ -31,4 +31,4 @@ const user_base = new Schema({
   collect:[collect_nfo]
 })
 
-module.exports = user_base
+module.exports = user_db
