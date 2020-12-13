@@ -13,11 +13,11 @@ const tag_nfo = new Schema({
 })
 
 const acticle_db = new Schema({
-  act_code:{
+  code:{
     type: Number,
     required: true
   },
-  acticle_name: {
+  name: {
     type: String,
     required: true
   },
@@ -25,7 +25,7 @@ const acticle_db = new Schema({
     type: String,
     required: true
   },
-  acticle_tag: [tag_nfo],
+  tag: [tag_nfo],
   author: {
     type: String,
     required: true
@@ -36,8 +36,7 @@ const acticle_db = new Schema({
   },
   writing_time:{
     type: Date
-  },
-  collect:[collect_nfo]
+  }
 })
 
 module.exports = acticle_db

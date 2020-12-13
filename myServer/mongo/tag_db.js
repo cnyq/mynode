@@ -7,20 +7,16 @@ const tag_relevance = new Schema({
   }
 })
 
-const tag_info = new Schema({
-  tag_name:{
+const tag_db = new Schema({
+  name:{
     type: String,
     required: true
   },
-  tag_code:{
+  code:{
     type: Number,
     required: true
   },
-  tag_relevance:[tag_relevance]
-})
-
-const tag_db = new Schema({
-  tag_info: [tag_info]
+  relevance:[tag_relevance]
 })
 
 module.exports = tag_db
