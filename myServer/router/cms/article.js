@@ -6,10 +6,21 @@ let server = '10.16.38.66';
 let port = 3000;
 
 module.exports = function (router) {
+  router.get('/acticleList', (req, res) => {
+    console.log('req.query', req.query)
+    // console.log('req', req)
+  })
   router.post('/acticleAdd', (req, res) => {
     console.log(req.body)
-    let arr = ['1111', '2212122']
-    res.sendDataFtm(200, { memu: arr })
+    let _data = req.body
+    _data.code = new Date() - 0
+    _data.create_time = new Date()
+    new acticle_db(_data).save().then(res => {
+      res.sendDataFtm(200)
+    }).catch(err => {
+      res.sendDataFtm(500, null, '失败')
+    })
+    // res.sendDataFtm(200, { memu: arr })
   })
   router.post('/uploadMd', (req, res) => {
     const form = new formidable.IncomingForm();
@@ -32,10 +43,10 @@ module.exports = function (router) {
         if (err) {
           throw err;
         } else {
-          res.send({
+          res.sendDataFtm(200, {
             url: "http://" + server + ":" + port + "/public/md/" + newMdName,
             name: mdName
-          });
+          })
         }
       });
     });
