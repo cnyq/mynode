@@ -7,17 +7,24 @@ let port = 3000;
 
 module.exports = function (router) {
   router.get('/acticleList', (req, res) => {
-    console.log('req.query', req.query)
-    // console.log('req', req)
+    acticle_db.countDocuments({}, (err, count) => {
+      if (err) return res.status(500).send('server error.');
+      acticle_db.fetch(req.query, (err, data) => {
+        console.log(err)
+        if (err) return res.status(500).send('server error.');
+        res.sendDataFtm(200, { list: data, total: count })
+      })
+    })
   })
   router.post('/acticleAdd', (req, res) => {
-    console.log(req.body)
     let _data = req.body
-    _data.code = new Date() - 0
-    _data.create_time = new Date()
-    new acticle_db(_data).save().then(res => {
+    let str = (Math.random()*(new Date() - 0)).toString()
+    _data.code = parseInt(str.slice(0, 8))
+    _data.create_time = (new Date()).getTime()
+    new acticle_db(_data).save().then(it => {
       res.sendDataFtm(200)
     }).catch(err => {
+      console.log(err)
       res.sendDataFtm(500, null, '失败')
     })
     // res.sendDataFtm(200, { memu: arr })

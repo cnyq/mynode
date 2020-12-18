@@ -15,6 +15,13 @@ exports.sendData = (code, data = null, msg = '') => {
         msg: msg || 'error'
       }
       break;
+    case 500:
+      obj = {
+        code: 500,
+        data: data,
+        msg: msg || 'error'
+      }
+      break;
   }
   return obj
 }
