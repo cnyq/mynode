@@ -47,10 +47,10 @@ acticle_db.statics = {
   fetch(query, cb) {
     let pageSize = parseInt(query.pageSize),
       pageNum = parseInt(query.pageNum),
-      name = query.name,
-      author = query.author,
-      startTime = query.startTime,
-      endTime = query.endTime
+      name = query.name || '',
+      author = query.author || '',
+      startTime = query.startTime || '',
+      endTime = query.endTime || ''
     let regName = new RegExp(name, 'i')
     let regAuthor = new RegExp(author, 'i')
     if (startTime && endTime) {

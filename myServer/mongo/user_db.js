@@ -12,15 +12,14 @@ const collect_nfo = new Schema({
 })
 
 const user_db = new Schema({
-  nick_name: {
+  username: {
     type: String,
     required: true
   },
   email: {
-    type: String,
-    required: true
+    type: String
   },
-  certificate: {
+  password: {
     type: String,
     required: true
   },
