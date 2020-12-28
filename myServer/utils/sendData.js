@@ -15,6 +15,13 @@ exports.sendData = (code, data = null, msg = '') => {
         msg: msg || 'error'
       }
       break;
+    case 401:
+      obj = {
+        code: 401,
+        data: data,
+        msg: msg || '登录失效'
+      }
+      break;
     case 500:
       obj = {
         code: 500,

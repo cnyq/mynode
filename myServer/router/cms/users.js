@@ -1,16 +1,17 @@
 const { user_db: USER } = require('../../mongo/index')
 const crypto = require('../../utils/myCrypto')
+const { creatToken } = require('../../utils/jwt')
 
 module.exports = function (router) {
   router.post('/register', (req, res) => {
     let { username, password } = req.body;
     USER.find({ username: username }, (err, data) => {
-      console.log(err, data)
+      // console.log(err, data)
       if (err) return res.status(500).send('server error.');
       if (data.length) {
         res.sendDataFtm(200, { status: 0, hint: '该用户已注册' }, false)
       } else {
-        let _data={
+        let _data = {
           username: username,
           password: crypto.md5(password)
         }
@@ -24,17 +25,23 @@ module.exports = function (router) {
     })
   })
   router.post('/login', (req, res) => {
+    // console.log('req.headers.cookie', req.headers.cookie)
     let { username, password } = req.body;
     USER.find({ username: username }, (err, data) => {
-      console.log(err, data ,req.body)
+      // console.log(err, data, req.body)
       if (err) return res.status(500).send('server error.');
       if (!data.length) {
-        res.sendDataFtm(200, { status: 0 }, '该用户未注册')
+        res.sendDataFtm(200, { status: 0, hint: '该用户未注册' }, false)
       } else {
         let passwordMd5 = crypto.md5(password)
-        if(passwordMd5 == data[0].password){
-          res.sendDataFtm(200, { status: 1 })
-        }else{
+        if (passwordMd5 == data[0].password) {
+          let _sendData = creatToken(username)
+          res.sendDataFtm(200, {
+            status: 1, token: _sendData, userInfo: {
+              username: username
+            }
+          })
+        } else {
           res.sendDataFtm(200, { status: 0, hint: '密码不正确' }, false)
         }
       }

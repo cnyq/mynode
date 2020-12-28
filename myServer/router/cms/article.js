@@ -10,7 +10,7 @@ module.exports = function (router) {
     acticle_db.countDocuments({}, (err, count) => {
       if (err) return res.status(500).send('server error.');
       acticle_db.fetch(req.query, (err, data) => {
-        console.log(err)
+        // console.log(err)
         if (err) return res.status(500).send('server error.');
         res.sendDataFtm(200, { list: data, total: count })
       })
