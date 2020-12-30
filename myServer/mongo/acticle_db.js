@@ -53,18 +53,13 @@ acticle_db.statics = {
       endTime = query.endTime || ''
     let regName = new RegExp(name, 'i')
     let regAuthor = new RegExp(author, 'i')
-    if (startTime && endTime) {
-      return this.find({ '$and': [{ 'name': { "$regex": regName } }, { 'author': { "$regex": regAuthor } }, { 'writing_time': { "$lte": endTime,"$gt": startTime } }] })
-        .limit(pageSize)
-        .skip((pageNum - 1) * pageSize)
-        .exec(cb);
-    } else {
-      return this.find({ '$and': [{ 'name': { "$regex": regName } }, { 'author': { "$regex": regAuthor } }] })
-        .limit(pageSize)
-        .skip((pageNum - 1) * pageSize)
-        .exec(cb);
-    }
-
+    let _date = (new Date()).getTime();
+    let findArr = this.find({ '$and': [{ 'name': { "$regex": regName } }, { 'author': { "$regex": regAuthor } }, { 'writing_time': { "$lte": endTime ? endTime : _date, "$gt": startTime ? startTime : 0 } }] })
+    findArr.sort('-writing_time')
+      .limit(pageSize)
+      .skip((pageNum - 1) * pageSize)
+      .exec(cb);
+    return findArr
   }
 }
 

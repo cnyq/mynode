@@ -19,10 +19,10 @@ function verifyToken() {
     let token = req.cookies['token']
     myVerify(token, (err, data) => {
       if (err) {
-        console.log('err:' + JSON.stringify(err))
+        // console.log('err:' + JSON.stringify(err))
         res.send(sendData(401))
       } else {
-        console.log('data:' + JSON.stringify(data))
+        // console.log('data:' + JSON.stringify(data))
         next();
       }
     })
