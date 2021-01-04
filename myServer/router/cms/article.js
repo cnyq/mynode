@@ -1,4 +1,4 @@
-const { acticle_db: ACTICLE, tag_db } = require('../../mongo/index')
+const { acticle_db: ACTICLE, tag_db: TAG } = require('../../mongo/index')
 const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
@@ -7,13 +7,11 @@ let port = 3000;
 
 module.exports = function (router) {
   router.get('/acticleList', (req, res) => {
-    ACTICLE.fetch(req.query, (err, data) => {
-      // console.log(err)
-      if (err) return res.status(500).send('server error.');
-    }).countDocuments({}, (err, count) => {
-      if (err) return res.status(500).send('server error.');
-      res.sendDataFtm(200, { list: data, total: count })
-    })
+    Promise.all([ACTICLE.fetchData(req.query), ACTICLE.fetchCount(req.query)])
+      .then(resolve => {
+        res.sendDataFtm(200, { list: resolve[0], total: resolve[1] })
+      })
+      .catch(e => res.status(500).send('server error.'))
   })
   router.post('/acticleAdd', (req, res) => {
     let _data = req.body
@@ -26,7 +24,36 @@ module.exports = function (router) {
       console.log(err)
       res.sendDataFtm(500, null, '失败')
     })
-    // res.sendDataFtm(200, { memu: arr })
+  })
+  router.get('/tagList', (req, res) => {
+    TAG.fetchData(req.query, (err, data) => {
+      if (err) res.status(500).send('server error.')
+      res.sendDataFtm(200, { list: data })
+    })
+  })
+  router.post('/tagAdd', async (req, res) => {
+    let _data = req.body
+    if (!_data.name) {
+      res.sendDataFtm(400, null, 'tag名称不能为空')
+    } else {
+      let _doc
+      await TAG.findOne({ $where: `this.name == ${_data.name}` }, (err, doc) => {
+        console.log('aaa')
+        _doc = doc
+      })
+      if (_doc) {
+        res.sendDataFtm(400, null, `tag为${_data.name}名称的已存在`)
+      } else {
+        let str = (Math.random() * (new Date() - 0)).toString()
+        _data.code = parseInt(str.slice(0, 8))
+        new TAG(_data).save().then(it => {
+          res.sendDataFtm(200)
+        }).catch(err => {
+          console.log(err)
+          res.sendDataFtm(500, null, '失败')
+        })
+      }
+    }
   })
   router.post('/uploadMd', (req, res) => {
     const form = new formidable.IncomingForm();
