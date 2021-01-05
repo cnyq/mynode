@@ -7,5 +7,5 @@ exports.myVerify = (token, callback) => {
   })
 }
 exports.creatToken = (username) => {
-  return jwt.sign({ username: username }, secret, { expiresIn: 60 * 60 * 2 })
+  return jwt.sign({ username: username }, secret, { expiresIn: 60 * 60 * 24 })
 }

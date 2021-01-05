@@ -18,16 +18,44 @@ module.exports = function (router) {
     let str = (Math.random() * (new Date() - 0)).toString()
     _data.code = parseInt(str.slice(0, 8))
     _data.create_time = (new Date()).getTime()
-    new ACTICLE(_data).save().then(it => {
+    let idArr = _data.tag.map(it => it._id)
+    _data.tag = idArr
+    new ACTICLE(_data).save().then(async it => {
+      let id = it._id
+      await TAG.find({ _id: { $in: idArr } }, async (err, docs) => {
+        if (err) return res.status(500).send('server error.')
+        for (const item of docs) {
+          item.acticle.push(id)
+          await item.save()
+        }
+      })
       res.sendDataFtm(200)
     }).catch(err => {
-      console.log(err)
-      res.sendDataFtm(500, null, '失败')
+      console.log('err-------', err)
+    })
+  })
+  router.get('/acticleInfo', (req, res) => {
+    let _id = req.query.id
+    ACTICLE.findById(_id).populate({ path: 'tag', select: 'name' }).exec((err, data) => {
+      if (err) return res.status(500).send('server error.')
+      // console.log(data)
+      res.sendDataFtm(200, data)
+    })
+  })
+  router.post('/acticleEdit', (req, res) => {
+    let id = req.body._id
+    console.log(req.body)
+    ACTICLE.update({ _id: id }, req.body, (err, data) => {
+      console.log('err-----', err)
+      console.log(data)
+      if (err) return res.status(500).send('server error.')
+      // console.log(data)
+      res.sendDataFtm(200)
     })
   })
   router.get('/tagList', (req, res) => {
     TAG.fetchData(req.query, (err, data) => {
-      if (err) res.status(500).send('server error.')
+      if (err) return res.status(500).send('server error.')
       res.sendDataFtm(200, { list: data })
     })
   })
@@ -37,7 +65,7 @@ module.exports = function (router) {
       res.sendDataFtm(400, null, 'tag名称不能为空')
     } else {
       let _doc
-      await TAG.findOne({ $where: `this.name == ${_data.name}` }, (err, doc) => {
+      await TAG.findOne({ $where: `this.name == "${_data.name}"` }, (err, doc) => {
         console.log('aaa')
         _doc = doc
       })
@@ -47,6 +75,7 @@ module.exports = function (router) {
         let str = (Math.random() * (new Date() - 0)).toString()
         _data.code = parseInt(str.slice(0, 8))
         new TAG(_data).save().then(it => {
+          // console.log('it',it)
           res.sendDataFtm(200)
         }).catch(err => {
           console.log(err)

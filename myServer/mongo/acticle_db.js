@@ -66,6 +66,7 @@ acticle_db.statics = {
       let pageSize = parseInt(query.pageSize),
         pageNum = parseInt(query.pageNum)
       this.findCommon(query)
+        .populate({path:'tag', select: 'name'})
         .sort('-writing_time')
         .limit(pageSize)
         .skip((pageNum - 1) * pageSize)

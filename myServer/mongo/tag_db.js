@@ -29,7 +29,6 @@ tag_db.statics = {
       .exec(cb);
     return findArr
   }
-
 }
 
 module.exports = tag_db
