@@ -39,7 +39,8 @@ const acticle_db = new Schema({
   },
   writing_time: {
     type: Number
-  }
+  },
+  banner: []
 })
 
 //查询方法
@@ -66,12 +67,12 @@ acticle_db.statics = {
       let pageSize = parseInt(query.pageSize),
         pageNum = parseInt(query.pageNum)
       this.findCommon(query)
-        .populate({path:'tag', select: 'name'})
+        .populate({ path: 'tag', select: 'name' })
         .sort('-writing_time')
         .limit(pageSize)
         .skip((pageNum - 1) * pageSize)
         .exec((err, data) => {
-          if (err) rej(err)
+          if (err) console.log(err)
           res(data)
         });
     })
@@ -85,21 +86,49 @@ acticle_db.statics = {
         })
     })
   },
+  toObjectId(ids) {
+    if (ids.constructor === Array) {
+      return ids.map(mongoose.Types.ObjectId);
+    }
+    return mongoose.Types.ObjectId(ids);
+  },
   findCommon(query, cb) {
     let name = query.name || '',
       author = query.author || '',
       startTime = query.startTime || '',
       endTime = query.endTime || '',
+      tagArr = query.tag ? query.tag.split(',') : '',
       regName = new RegExp(name, 'i'),
-      regAuthor = new RegExp(author, 'i'),
-      _date = (new Date()).getTime();
-    let findArr = this.find({
-      '$and': [
-        { 'name': { "$regex": regName } },
-        { 'author': { "$regex": regAuthor } },
-        { 'writing_time': { "$lte": endTime ? endTime : _date, "$gt": startTime ? startTime : 0 } }
-      ]
-    })
+      regAuthor = new RegExp(author, 'i')
+    findCondition = []
+    if (name) {
+      findCondition.push({ 'name': { "$regex": regName } })
+    }
+    if (author) {
+      findCondition.push({ 'author': { "$regex": regAuthor } })
+    }
+    if (startTime) {
+      findCondition.push({ 'writing_time': { "$gt": startTime } })
+    }
+    if (endTime) {
+      findCondition.push({ 'writing_time': { "$lte": endTime } })
+    }
+    if (tagArr) {
+      // let tagMap = tagArr.map(value => ({ "$elemMatch": { '_id': this.toObjectId(value) } }));
+      // console.log(tag, tagMap)
+      // findCondition.push({ 'tag': { "$all" : tagMap} })
+    }
+
+    let findArr
+    // console.log(JSON.stringify(findCondition))
+    if (findCondition.length == 0) {
+      findArr = this.find()
+    } else {
+      findArr = this.find({
+        '$and': findCondition
+      })
+    }
+
     return findArr
   }
 }
