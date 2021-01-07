@@ -14,7 +14,9 @@ module.exports = function (router) {
     _data.code = parseInt(str.slice(0, 8))
     _data.create_time = (new Date()).getTime()
     let idArr = _data.tag.map(it => it._id)
+    let codeArr = _data.tagCode.map(it => ({code: it}))
     _data.tag = idArr
+    _data.tagCode = codeArr
     new ACTICLE(_data).save().then(async it => {
       let id = it._id
       await TAG.find({ _id: { $in: idArr } }, async (err, docs) => {

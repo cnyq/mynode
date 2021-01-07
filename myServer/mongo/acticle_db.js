@@ -1,14 +1,10 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-// const tag_nfo = new Schema({
-//   name: {
-//     type: String,
-//     required: true
-//   },
+// const tagCode = new Schema({
 //   code: {
 //     type: Number,
-//     required: true
+//     // required: true
 //   }
 // })
 
@@ -34,6 +30,7 @@ const acticle_db = new Schema({
     // required: true
   },
   tag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tag_db' }],
+  tagCode: [],
   create_time: {
     type: Number
   },
@@ -114,13 +111,12 @@ acticle_db.statics = {
       findCondition.push({ 'writing_time': { "$lte": endTime } })
     }
     if (tagArr) {
-      // let tagMap = tagArr.map(value => ({ "$elemMatch": { '_id': this.toObjectId(value) } }));
-      // console.log(tag, tagMap)
-      // findCondition.push({ 'tag': { "$all" : tagMap} })
+      let tagMap = tagArr.map(value => ({ "$elemMatch": { 'code':  parseInt(value)} }));
+      findCondition.push({ 'tagCode': { "$all" : tagMap} })
     }
 
     let findArr
-    // console.log(JSON.stringify(findCondition))
+    console.log(JSON.stringify(findCondition))
     if (findCondition.length == 0) {
       findArr = this.find()
     } else {

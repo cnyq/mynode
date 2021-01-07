@@ -24,7 +24,7 @@ tag_db.statics = {
   fetchData(query, cb) {
     let name = query.name || '',
       regName = new RegExp(name, 'i')
-    let findArr = this.find({ '$and': [{ 'name': { "$regex": regName } }] }, { name: 1 })
+    let findArr = this.find({ '$and': [{ 'name': { "$regex": regName } }] }, { name: 1, code: 1 })
     findArr.sort()
       .exec(cb);
     return findArr
