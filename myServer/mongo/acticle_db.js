@@ -116,7 +116,7 @@ acticle_db.statics = {
     }
 
     let findArr
-    console.log(JSON.stringify(findCondition))
+    // console.log(JSON.stringify(findCondition))
     if (findCondition.length == 0) {
       findArr = this.find()
     } else {

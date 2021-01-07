@@ -1,4 +1,18 @@
 const { acticle_db: ACTICLE, tag_db: TAG } = require('../../mongo/index')
+const mongoose = require('mongoose')
+function toObjectId(ids) {
+  if (ids.constructor === Array) {
+    return ids.map(mongoose.Types.ObjectId);
+  }
+  return mongoose.Types.ObjectId(ids);
+}
+
+function getArrDifference(arr1, arr2) {
+  return arr1.concat(arr2).filter(function (v, i, arr) {
+    // console.log(arr, arr.indexOf(v), arr.lastIndexOf(v))
+    return arr.indexOf(v) === arr.lastIndexOf(v);
+  });
+}
 
 module.exports = function (router) {
   router.get('/acticleList', (req, res) => {
@@ -12,11 +26,9 @@ module.exports = function (router) {
     let _data = req.body
     let str = (Math.random() * (new Date() - 0)).toString()
     _data.code = parseInt(str.slice(0, 8))
-    _data.create_time = (new Date()).getTime()
+    // _data.create_time = (new Date()).getTime()
     let idArr = _data.tag.map(it => it._id)
-    let codeArr = _data.tagCode.map(it => ({code: it}))
     _data.tag = idArr
-    _data.tagCode = codeArr
     new ACTICLE(_data).save().then(async it => {
       let id = it._id
       await TAG.find({ _id: { $in: idArr } }, async (err, docs) => {
@@ -33,18 +45,40 @@ module.exports = function (router) {
   })
   router.get('/acticleInfo', (req, res) => {
     let _id = req.query.id
-    ACTICLE.findById(_id).populate({ path: 'tag', select: 'name' }).exec((err, data) => {
+    ACTICLE.findById(_id).populate({ path: 'tag', select: 'name code' }).exec((err, data) => {
       if (err) return res.status(500).send('server error.')
       // console.log(data)
       res.sendDataFtm(200, data)
     })
   })
-  router.post('/acticleEdit', (req, res) => {
+  router.post('/acticleEdit', async (req, res) => {
     let id = req.body._id
-    console.log(req.body)
-    ACTICLE.update({ _id: id }, req.body, (err, data) => {
-      console.log('err-----', err)
-      console.log(data)
+    // console.log(req.body)
+    let oldTagArr = [],
+      newTagArr = req.body.tag.map(it => (it._id.toString()))
+    await ACTICLE.findById(id, (err, data) => {
+      if (err) return res.status(500).send('server error.')
+      oldTagArr = data.tag.map(it=>mongoose.Types.ObjectId(it).toString())
+    })
+    // console.log(oldTagArr, newTagArr)
+    let findTag = getArrDifference(oldTagArr, newTagArr)
+    // console.log('findTag', findTag)
+    if (findTag.length > 0) {
+      await TAG.find({ _id: { $in: findTag } }, async (err, docs) => {
+        if (err) return res.status(500).send('server error.')
+        // console.log('docs',docs)
+        for (const item of docs) {
+          let _index = item.acticle.indexOf(id)
+          if (item.acticle.indexOf(id) < 0) {
+            item.acticle.push(id)
+          } else {
+            item.acticle.splice(_index, 1)
+          }
+          await item.save()
+        }
+      })
+    }
+    ACTICLE.updateOne({ _id: id }, req.body, (err, data) => {
       if (err) return res.status(500).send('server error.')
       // console.log(data)
       res.sendDataFtm(200)
@@ -81,5 +115,5 @@ module.exports = function (router) {
       }
     }
   })
-  
+
 }
