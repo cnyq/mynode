@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { user_base } = require('../mongo/index')
-const { sendData } = require('../utils/sendData')
+const { sendData } = require('../utils/common')
 
 router.get('/list', (req, res) => {
   // let obj = {

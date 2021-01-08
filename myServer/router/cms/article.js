@@ -1,19 +1,5 @@
 const { acticle_db: ACTICLE, tag_db: TAG } = require('../../mongo/index')
-const mongoose = require('mongoose')
-function toObjectId(ids) {
-  if (ids.constructor === Array) {
-    return ids.map(mongoose.Types.ObjectId);
-  }
-  return mongoose.Types.ObjectId(ids);
-}
-
-function getArrDifference(arr1, arr2) {
-  return arr1.concat(arr2).filter(function (v, i, arr) {
-    // console.log(arr, arr.indexOf(v), arr.lastIndexOf(v))
-    return arr.indexOf(v) === arr.lastIndexOf(v);
-  });
-}
-
+const { toObjectIdStr, getArrDifference } = require('../../utils/common')
 module.exports = function (router) {
   router.get('/acticleList', (req, res) => {
     Promise.all([ACTICLE.fetchData(req.query), ACTICLE.fetchCount(req.query)])
@@ -58,7 +44,8 @@ module.exports = function (router) {
       newTagArr = req.body.tag.map(it => (it._id.toString()))
     await ACTICLE.findById(id, (err, data) => {
       if (err) return res.status(500).send('server error.')
-      oldTagArr = data.tag.map(it=>mongoose.Types.ObjectId(it).toString())
+      // oldTagArr = data.tag.map(it => mongoose.Types.ObjectId(it).toString())
+      oldTagArr = toObjectIdStr(data.tag)
     })
     // console.log(oldTagArr, newTagArr)
     let findTag = getArrDifference(oldTagArr, newTagArr)
@@ -81,6 +68,34 @@ module.exports = function (router) {
     ACTICLE.updateOne({ _id: id }, req.body, (err, data) => {
       if (err) return res.status(500).send('server error.')
       // console.log(data)
+      res.sendDataFtm(200)
+    })
+  })
+  router.post('/acticleDel', async (req, res) => {
+    let id = req.body._id, findTagArr = [], isErr = false
+    await ACTICLE.findById(id, (err, data) => {
+      if (err || !data) return isErr = true
+      findTagArr = toObjectIdStr(data.tag)
+    })
+    if (isErr) return res.status(500).send('server error.')
+    if (findTagArr.length > 0) {
+      await TAG.find({ _id: { $in: findTagArr } }, async (err, docs) => {
+        if (err) return isErr = true
+        for (const item of docs) {
+          let _index = item.acticle.indexOf(id)
+          if (_index != -1) {
+            item.acticle.splice(_index, 1)
+            await item.save()
+          } else {
+            isErr = true
+            break
+          }
+        }
+      })
+    }
+    if (isErr) return res.status(500).send('server error.')
+    ACTICLE.findByIdAndRemove(id).exec((err, doc) => {
+      if (err) return res.status(500).send('server error.')
       res.sendDataFtm(200)
     })
   })

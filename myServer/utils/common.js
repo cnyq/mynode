@@ -1,3 +1,26 @@
+const mongoose = require('mongoose')
+
+exports.toObjectId = (ids) => {
+  if (Array.isArray(ids)) {
+    return ids.map(mongoose.Types.ObjectId);
+  }
+  return mongoose.Types.ObjectId(ids);
+}
+
+exports.toObjectIdStr = (ids) => {
+  if (Array.isArray(ids)) {
+    return ids.map(it => mongoose.Types.ObjectId(it).toString());
+  }
+  return mongoose.Types.ObjectId(ids).toString()
+}
+
+exports.getArrDifference = (arr1, arr2) => {
+  return arr1.concat(arr2).filter(function (v, i, arr) {
+    return arr.indexOf(v) === arr.lastIndexOf(v);
+  });
+}
+
+
 exports.sendData = (code, data = null, msg = '') => {
   let obj = {}
   switch (code) {

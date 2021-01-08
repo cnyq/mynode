@@ -1,4 +1,4 @@
-const { sendData } = require('../utils/sendData')
+const { sendData } = require('../utils/common')
 const { myVerify } = require('../utils/jwt')
 
 function sendD() {
