@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000
 const myMiddleware = require('./middleware')
 
 const cms = require('./router/cms/index')
-const user = require('./router/user')
+const api = require('./router/api/index')
 
 app.use(myMiddleware.sendD())
 
@@ -20,9 +20,9 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 app.use(cookieParser());
 app.use('/public', express.static(path.join(__dirname, 'public')))
 
-app.use('/api', user)
 app.use('/cms', myMiddleware.verifyToken())
 app.use('/cms', cms)
+app.use('/api', api)
 
 // app.use(function (req, res, next) {
 //   next(createError(404));
