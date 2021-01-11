@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 
+//转ObjectId格式
 exports.toObjectId = (ids) => {
   if (Array.isArray(ids)) {
     return ids.map(mongoose.Types.ObjectId);
@@ -7,6 +8,7 @@ exports.toObjectId = (ids) => {
   return mongoose.Types.ObjectId(ids);
 }
 
+//ObjectId格式字符串
 exports.toObjectIdStr = (ids) => {
   if (Array.isArray(ids)) {
     return ids.map(it => mongoose.Types.ObjectId(it).toString());
@@ -14,13 +16,20 @@ exports.toObjectIdStr = (ids) => {
   return mongoose.Types.ObjectId(ids).toString()
 }
 
+//合并2个数组找出不同
 exports.getArrDifference = (arr1, arr2) => {
   return arr1.concat(arr2).filter(function (v, i, arr) {
     return arr.indexOf(v) === arr.lastIndexOf(v);
   });
 }
 
+//随机生成code
+exports.getCode = (num = 8) => {
+  let str = (Math.random() * (new Date() - 0)).toString()
+  return parseInt(str.slice(0, num))
+}
 
+//发送处理
 exports.sendData = (code, data = null, msg = '') => {
   let obj = {}
   switch (code) {

@@ -1,5 +1,5 @@
 const { acticle_db: ACTICLE, tag_db: TAG } = require('../../mongo/index')
-const { toObjectIdStr, getArrDifference } = require('../../utils/common')
+const { toObjectIdStr, getArrDifference,getCode } = require('../../utils/common')
 module.exports = function (router) {
   router.get('/acticleList', (req, res) => {
     Promise.all([ACTICLE.fetchData(req.query), ACTICLE.fetchCount(req.query)])
@@ -8,26 +8,24 @@ module.exports = function (router) {
       })
       .catch(e => res.status(500).send('server error.'))
   })
-  router.post('/acticleAdd', (req, res) => {
+  router.post('/acticleAdd', async(req, res) => {
     let _data = req.body
-    let str = (Math.random() * (new Date() - 0)).toString()
-    _data.code = parseInt(str.slice(0, 8))
-    // _data.create_time = (new Date()).getTime()
     let idArr = _data.tag.map(it => it._id)
     _data.tag = idArr
-    new ACTICLE(_data).save().then(async it => {
-      let id = it._id
-      await TAG.find({ _id: { $in: idArr } }, async (err, docs) => {
-        if (err) return res.status(500).send('server error.')
-        for (const item of docs) {
-          item.acticle.push(id)
-          await item.save()
-        }
-      })
-      res.sendDataFtm(200)
-    }).catch(err => {
-      console.log('err-------', err)
+    _data.code = getCode()
+    let artId = ''
+    await new ACTICLE(_data).save().then(it => {
+      artId = it._id
     })
+    await TAG.find({ _id: { $in: idArr } }, async (err, docs) => {
+      if (err) return res.status(500).send('server error.')
+      for (const item of docs) {
+        item.acticle.push(artId)
+        await item.save()
+      }
+    })
+
+    res.sendDataFtm(200)
   })
   router.get('/acticleInfo', (req, res) => {
     let _id = req.query.id
@@ -118,8 +116,7 @@ module.exports = function (router) {
       if (_doc) {
         res.sendDataFtm(400, null, `tag为${_data.name}名称的已存在`)
       } else {
-        let str = (Math.random() * (new Date() - 0)).toString()
-        _data.code = parseInt(str.slice(0, 8))
+        _data.code = getCode()
         new TAG(_data).save().then(it => {
           // console.log('it',it)
           res.sendDataFtm(200)

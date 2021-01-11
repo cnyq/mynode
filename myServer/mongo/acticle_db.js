@@ -30,6 +30,7 @@ const acticle_db = new Schema({
     // required: true
   },
   tag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tag_db' }],
+  mdInfo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'acticle_html_db' }],
   tagCode: [],
   create_time: {
     type: Number
