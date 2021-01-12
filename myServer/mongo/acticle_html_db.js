@@ -8,7 +8,8 @@ const acticle_html_db = new Schema({
   },
   info:{
     type: String
-  }
+  },
+  acticle: { type: mongoose.Schema.Types.ObjectId, ref: 'acticle_db' }
 })
 
 //查询方法
