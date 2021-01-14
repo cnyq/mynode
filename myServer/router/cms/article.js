@@ -24,7 +24,7 @@ module.exports = function (router) {
         await item.save()
       }
     })
-    await ACTICLEHTML.findById(_data.mdInfo, (err, docs) => {
+    await ACTICLEHTML.findById(_data.mdInfo._id, (err, docs) => {
       if (err) return res.status(500).send('server error.')
       docs.acticle = artId
       docs.save()
@@ -34,7 +34,7 @@ module.exports = function (router) {
   })
   router.get('/acticleInfo', (req, res) => {
     let _id = req.query.id
-    ACTICLE.findById(_id).populate({ path: 'tag', select: 'name code' }).exec((err, data) => {
+    ACTICLE.findById(_id).populate({ path: 'tag', select: 'name code' }).populate({ path: 'mdInfo', select: 'name' }).exec((err, data) => {
       if (err) return res.status(500).send('server error.')
       // console.log(data)
       res.sendDataFtm(200, data)
@@ -75,10 +75,11 @@ module.exports = function (router) {
     })
   })
   router.post('/acticleDel', async (req, res) => {
-    let id = req.body._id, findTagArr = [], isErr = false
+    let id = req.body._id, findTagArr = [], isErr = false, mdInfo = ''
     await ACTICLE.findById(id, (err, data) => {
       if (err || !data) return isErr = true
       findTagArr = toObjectIdStr(data.tag)
+      mdInfo = data.mdInfo
     })
     if (isErr) return res.status(500).send('server error.')
     if (findTagArr.length > 0) {
@@ -97,7 +98,10 @@ module.exports = function (router) {
       })
     }
     if (isErr) return res.status(500).send('server error.')
-    ACTICLE.findByIdAndRemove(id).exec((err, doc) => {
+    await ACTICLEHTML.findByIdAndRemove(mdInfo, (err, doc) => {
+      if (err) return res.status(500).send('server error.')
+    })
+    ACTICLE.findByIdAndDelete(id).exec((err, doc) => {
       if (err) return res.status(500).send('server error.')
       res.sendDataFtm(200)
     })

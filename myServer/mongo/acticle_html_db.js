@@ -9,6 +9,9 @@ const acticle_html_db = new Schema({
   info:{
     type: String
   },
+  name:{
+    type: String
+  },
   acticle: { type: mongoose.Schema.Types.ObjectId, ref: 'acticle_db' }
 })
 

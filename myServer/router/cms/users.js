@@ -1,6 +1,7 @@
 const { user_db: USER } = require('../../mongo/index')
 const crypto = require('../../utils/myCrypto')
 const { creatToken } = require('../../utils/jwt')
+const { myVerify } = require('../../utils/jwt')
 
 module.exports = function (router) {
   router.post('/register', (req, res) => {
@@ -46,5 +47,21 @@ module.exports = function (router) {
         }
       }
     })
+  })
+  router.get('/user', (req, res) => {
+    let token = req.cookies['token']
+    myVerify(token, (err, data) => {
+      if (err) {
+        return res.send(sendData(401))
+      } else {
+        let username = data.username
+        res.sendDataFtm(200, {
+          status: 1, userInfo: {
+            username: username
+          }
+        })
+      }
+    })
+    
   })
 }

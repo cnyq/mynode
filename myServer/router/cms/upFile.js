@@ -53,11 +53,12 @@ module.exports = function (router) {
       })
       let _data = {
         code: getCode(),
-        info: toHtml
+        info: toHtml,
+        name: name
       }
       await new ACTICLEHTML(_data).save().then(it=>{
         res.sendDataFtm(200, {
-          id: it._id,
+          _id: it._id,
           code: it.code,
           name: name
         })
@@ -68,7 +69,7 @@ module.exports = function (router) {
   })
   router.post('/delActicleInfo',(req,res)=>{
     let id = req.body._id
-    ACTICLEHTML.findByIdAndRemove(id).exec((err, doc) => {
+    ACTICLEHTML.findByIdAndDelete(id).exec((err, doc) => {
       if (err) return res.status(500).send('server error.')
       res.sendDataFtm(200)
     })
