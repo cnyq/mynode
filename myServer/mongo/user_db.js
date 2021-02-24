@@ -22,7 +22,6 @@ const user_db = new Schema({
 
 user_db.statics = {
   findCommon(query, cb) {
-    console.log('query',query)
     let username = query.username || '',
       startTime = query.startTime || 0,
       endTime = query.endTime || 0,
