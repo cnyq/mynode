@@ -6,6 +6,7 @@ const { myVerify } = require('../../utils/jwt')
 module.exports = function (router) {
   router.post('/register', (req, res) => {
     let { username, password } = req.body;
+    if (!username || !password) return res.sendDataFtm(200, { status: 0, hint: '账户/密码不能为空' }, false)
     USER.find({ username: username }, (err, data) => {
       // console.log(err, data)
       if (err) return res.status(500).send('server error.');
@@ -14,13 +15,21 @@ module.exports = function (router) {
       } else {
         let _data = {
           username: username,
-          password: crypto.md5(password)
+          password: crypto.md5(password),
+          create_time: (new Date() - 0)
         }
         new USER(_data).save().then(it => {
-          res.sendDataFtm(200, { status: 1, hint: '注册成功' })
+          let _sendData = creatToken(username)
+          res.sendDataFtm(200, {
+            status: 1,
+            token: _sendData, userInfo: {
+              username: username
+            },
+            hint: '注册成功'
+          })
         }).catch(err => {
           console.log(err)
-          res.sendDataFtm(500, null, '失败')
+          res.sendDataFtm(500, null, '注册失败')
         })
       }
     })
@@ -62,6 +71,13 @@ module.exports = function (router) {
         })
       }
     })
-    
+
+  })
+  router.get('/userList', (req, res) => {
+    Promise.all([USER.fetchData(req.query), USER.fetchCount(req.query)])
+      .then(resolve => {
+        res.sendDataFtm(200, { list: resolve[0], total: resolve[1] })
+      })
+      .catch(e => res.status(500).send('server error.'))
   })
 }

@@ -93,8 +93,8 @@ acticle_db.statics = {
       endTime = query.endTime || '',
       tagArr = query.tag ? query.tag.split(',') : '',
       regName = new RegExp(name, 'i'),
-      regAuthor = new RegExp(author, 'i')
-    findCondition = []
+      regAuthor = new RegExp(author, 'i'),
+      findCondition = []
     if (name) {
       findCondition.push({ 'name': { "$regex": regName } })
     }
@@ -108,8 +108,8 @@ acticle_db.statics = {
       findCondition.push({ 'writing_time': { "$lte": endTime } })
     }
     if (tagArr) {
-      let tagMap = tagArr.map(value => ({ "$elemMatch": { 'code':  parseInt(value)} }));
-      findCondition.push({ 'tagCode': { "$all" : tagMap} })
+      let tagMap = tagArr.map(value => ({ "$elemMatch": { 'code': parseInt(value) } }));
+      findCondition.push({ 'tagCode': { "$all": tagMap } })
     }
 
     let findArr
