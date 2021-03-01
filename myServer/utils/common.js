@@ -54,6 +54,13 @@ exports.sendData = (code, data = null, msg = '') => {
         msg: msg || '登录失效'
       }
       break;
+    case 402:
+      obj = {
+        code: 402,
+        data: data,
+        msg: msg || '权限不足'
+      }
+      break;
     case 500:
       obj = {
         code: 500,

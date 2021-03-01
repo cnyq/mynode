@@ -2,16 +2,16 @@ const { user_db: USER } = require('../../mongo/index')
 const crypto = require('../../utils/myCrypto')
 const { creatToken } = require('../../utils/jwt')
 const { myVerify } = require('../../utils/jwt')
-function findUser(username,isAuth = 3){
+function findUser(username, isAuth = 3) {
   return new Promise((res, rej) => {
     USER.find({ username: username }, (err, data) => {
       if (err) return rej()
-      if(!data.length){
+      if (!data.length) {
         res(false)
-      }else{
-        if(data[0].auth_status <= isAuth){
+      } else {
+        if (data[0].auth_status <= isAuth) {
           res(data)
-        }else{
+        } else {
           res(false)
         }
       }
@@ -19,12 +19,27 @@ function findUser(username,isAuth = 3){
     })
   })
 }
+function authUser(token, auth) {
+  return new Promise((res, rej) => {
+    let username = ""
+    myVerify(token, (err, data) => {
+      username = data.username
+    })
+    if(!username) return res(false)
+    findUser(username, auth).then(it => {
+      if (it) {
+        res(true)
+      }else{
+        res(false)
+      }
+    })
+  })
+}
 module.exports = function (router) {
   router.post('/login', (req, res) => {
     // console.log('req.headers.cookie', req.headers.cookie)
     let { username, password } = req.body;
-    findUser(username).then(data=>{
-      console.log('data',data)
+    findUser(username).then(data => {
       if (!data) {
         res.sendDataFtm(200, { status: 0, hint: '该用户未注册' }, false)
       } else {
@@ -41,7 +56,7 @@ module.exports = function (router) {
           res.sendDataFtm(200, { status: 0, hint: '密码不正确' }, false)
         }
       }
-    }).catch(err=>{
+    }).catch(err => {
       res.status(500).send('server error.')
     })
   })
@@ -49,7 +64,7 @@ module.exports = function (router) {
   router.post('/register', (req, res) => {
     let { username, password } = req.body;
     if (!username || !password) return res.sendDataFtm(200, { status: 0, hint: '账户/密码不能为空' }, false)
-    findUser(username).then(data=>{
+    findUser(username).then(data => {
       if (data) {
         res.sendDataFtm(200, { status: 0, hint: '该用户已注册' }, false)
       } else {
@@ -73,11 +88,11 @@ module.exports = function (router) {
           res.sendDataFtm(500, null, '注册失败')
         })
       }
-    }).catch(err=>{
+    }).catch(err => {
       res.status(500).send('server error.')
     })
   })
-  
+
   router.get('/user', (req, res) => {
     let token = req.cookies['token']
     myVerify(token, (err, data) => {
@@ -100,5 +115,14 @@ module.exports = function (router) {
         res.sendDataFtm(200, { list: resolve[0], total: resolve[1] })
       })
       .catch(e => res.status(500).send('server error.'))
+  })
+
+  router.post('/userAdd',async (req, res) => {
+    let token = req.cookies['token'], isAuth = false
+    await authUser(token,1).then(it=>{
+      isAuth = it
+    })
+    console.log(isAuth)
+    if(!isAuth) return res.sendDataFtm(500,null,'权限不足')
   })
 }

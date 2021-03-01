@@ -51,7 +51,7 @@ user_db.statics = {
       let pageSize = parseInt(query.pageSize),
         pageNum = parseInt(query.pageNum)
       this.findCommon(query)
-        .select('username create_time auth_status -_id')
+        .select('username create_time auth_status')
         .sort('-create_time')
         .limit(pageSize)
         .skip((pageNum - 1) * pageSize)
