@@ -5,7 +5,6 @@ const { myVerify } = require('../../utils/jwt')
 function findUser(username, isAuth = 3) {
   return new Promise((res, rej) => {
     USER.find({ username: username }, (err, data) => {
-      console.log('data', data)
       if (err) return rej()
       if (!data.length) {
         res(false)
@@ -198,6 +197,31 @@ module.exports = function (router) {
       }
     }).catch(err => {
       res.sendDataFtm(500)
+    })
+  })
+  router.post('/postwordChange', async (req, res) => {
+    let token = req.cookies['token'],
+      getUsername = ''
+    myVerify(token, (err, data) => {
+      getUsername = data.username
+    })
+    await findUser(getUsername).then(data => {
+      if (data) {
+        let { _id, username, password } = data[0]
+        let checkUsername = req.body.username,
+          checkpPassword = crypto.md5(req.body.oldPassword),
+          newPassword = crypto.md5(req.body.newPassword)
+        if (username != checkUsername) return res.sendDataFtm(200, { status: 0, hint: '用户校验有误' }, false)
+        if (password != checkpPassword) return res.sendDataFtm(200, { status: 0, hint: '原密码输入有误' }, false)
+        if (password == newPassword) return res.sendDataFtm(200, { status: 0, hint: '新密码与旧密码不能相同' }, false)
+        USER.updateOne({ _id: _id }, { password: newPassword }, (err, data) => {
+          if (err) return res.status(500).send('server error.')
+          console.log(data)
+          res.sendDataFtm(200, { status: 1, hint: '修改成功' })
+        })
+      } else {
+        res.sendDataFtm(200, { status: 0, hint: '未找到该用户' }, false)
+      }
     })
   })
 }
