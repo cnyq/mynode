@@ -1,5 +1,7 @@
 const { acticle_db: ACTICLE, tag_db: TAG, acticle_html_db: ACTICLEHTML } = require('../../mongo/index')
 const { toObjectIdStr, getArrDifference, getCode } = require('../../utils/common')
+const { findUser, authUser } = require('../../utils/authUser')
+
 module.exports = function (router) {
   router.get('/acticleList', (req, res) => {
     Promise.all([ACTICLE.fetchData(req.query), ACTICLE.fetchCount(req.query)])
@@ -9,6 +11,11 @@ module.exports = function (router) {
       .catch(e => res.status(500).send('server error.'))
   })
   router.post('/acticleAdd', async (req, res) => {
+    let token = req.cookies['token'], isAuth = false
+    await authUser(token, 2).then(it => {
+      isAuth = it
+    })
+    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
     let _data = req.body
     let idArr = _data.tag.map(it => it._id)
     _data.tag = idArr

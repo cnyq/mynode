@@ -1,40 +1,8 @@
 const { user_db: USER } = require('../../mongo/index')
 const crypto = require('../../utils/myCrypto')
-const { creatToken } = require('../../utils/jwt')
-const { myVerify } = require('../../utils/jwt')
-function findUser(username, isAuth = 3) {
-  return new Promise((res, rej) => {
-    USER.find({ username: username }, (err, data) => {
-      if (err) return rej()
-      if (!data.length) {
-        res(false)
-      } else {
-        if (data[0].auth_status <= isAuth) {
-          res(data)
-        } else {
-          res(false)
-        }
-      }
-      res(data)
-    })
-  })
-}
-function authUser(token, auth) {
-  return new Promise((res, rej) => {
-    let username = ""
-    myVerify(token, (err, data) => {
-      username = data.username
-    })
-    if (!username) return res(false)
-    findUser(username, auth).then(it => {
-      if (it) {
-        res(true)
-      } else {
-        res(false)
-      }
-    })
-  })
-}
+const { creatToken, myVerify } = require('../../utils/jwt')
+const { findUser, authUser } = require('../../utils/authUser')
+
 module.exports = function (router) {
   router.post('/login', (req, res) => {
     // console.log('req.headers.cookie', req.headers.cookie)
