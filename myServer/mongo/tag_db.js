@@ -1,12 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-// const tag_relevance = new Schema({
-//   code: {
-//     type: Number
-//   }
-// })
-
 const tag_db = new Schema({
   name: {
     type: String,

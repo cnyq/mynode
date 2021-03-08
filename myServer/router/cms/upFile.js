@@ -5,7 +5,7 @@ const marked = require("marked")
 const { getCode } = require('../../utils/common')
 const { acticle_html_db: ACTICLEHTML} = require('../../mongo/index')
 let server = '10.16.38.66';
-let port = 3000;
+let port = 9527;
 
 function read(path) {
   return new Promise((resolve, reject) => {

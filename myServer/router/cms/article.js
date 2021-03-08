@@ -48,6 +48,11 @@ module.exports = function (router) {
     })
   })
   router.post('/acticleEdit', async (req, res) => {
+    let token = req.cookies['token'], isAuth = false
+    await authUser(token, 2).then(it => {
+      isAuth = it
+    })
+    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
     let id = req.body._id
     // console.log(req.body)
     let oldTagArr = [],
@@ -82,6 +87,11 @@ module.exports = function (router) {
     })
   })
   router.post('/acticleDel', async (req, res) => {
+    let token = req.cookies['token'], isAuth = false
+    await authUser(token, 2).then(it => {
+      isAuth = it
+    })
+    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
     let id = req.body._id, findTagArr = [], isErr = false, mdInfo = ''
     await ACTICLE.findById(id, (err, data) => {
       if (err || !data) return isErr = true
@@ -120,6 +130,11 @@ module.exports = function (router) {
     })
   })
   router.post('/tagAdd', async (req, res) => {
+    let token = req.cookies['token'], isAuth = false
+    await authUser(token, 2).then(it => {
+      isAuth = it
+    })
+    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
     let _data = req.body
     if (!_data.name) {
       res.sendDataFtm(400, null, 'tag名称不能为空')
