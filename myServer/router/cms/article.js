@@ -124,28 +124,31 @@ module.exports = function (router) {
     })
   })
   router.get('/tagList', (req, res) => {
-    TAG.fetchData(req.query, (err, data) => {
-      if (err) return res.status(500).send('server error.')
-      res.sendDataFtm(200, { list: data })
-    })
+    Promise.all([TAG.fetchData(req.query), TAG.fetchCount(req.query)])
+      .then(resolve => {
+        res.sendDataFtm(200, { list: resolve[0], total: resolve[1] })
+      })
+      .catch(e => res.status(500).send('server error.'))
   })
   router.post('/tagAdd', async (req, res) => {
     let token = req.cookies['token'], isAuth = false
-    await authUser(token, 2).then(it => {
+    await authUser(token, 1).then(it => {
       isAuth = it
     })
     if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
     let _data = req.body
+    console.log('_data', _data)
     if (!_data.name) {
-      res.sendDataFtm(400, null, 'tag名称不能为空')
+      res.sendDataFtm(201, null, 'tag名称不能为空')
     } else {
       let _doc
-      await TAG.findOne({ $where: `this.name == "${_data.name}"` }, (err, doc) => {
-        console.log('aaa')
+      await TAG.findOne({ name: _data.name }, (err, doc) => {
+        console.log('err', err)
         _doc = doc
       })
+      console.log('_doc', _doc)
       if (_doc) {
-        res.sendDataFtm(400, null, `tag为${_data.name}名称的已存在`)
+        res.sendDataFtm(201, null, `tag为${_data.name}名称的已存在`)
       } else {
         _data.code = getCode()
         new TAG(_data).save().then(it => {
@@ -158,5 +161,40 @@ module.exports = function (router) {
       }
     }
   })
-
+  router.post('/tagDel', async (req, res) => {
+    let token = req.cookies['token'], isAuth = false
+    await authUser(token, 1).then(it => {
+      isAuth = it
+    })
+    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
+    let id = req.body._id, findActicleArr = [], isErr = false
+    await TAG.findById(id, (err, data) => {
+      if (err || !data) return isErr = true
+      findActicleArr = toObjectIdStr(data.acticle)
+    })
+    if (isErr) return res.sendDataFtm(500, null, 'id错误')
+    let acticleName = ''
+    if (findActicleArr.length > 0) {
+      await ACTICLE.find({ _id: { $in: findActicleArr } }, async (err, docs) => {
+        if (err) return isErr = true
+        for (const item of docs) {
+          let _index = item.tag.indexOf(id)
+          console.log('_index,item.tag',item.tag,_index)
+          if (_index != -1 && item.tag.length > 1) {
+            item.tag.splice(_index, 1)
+            await item.save()
+          } else {
+            acticleName = item.name
+            isErr = true
+            break
+          }
+        }
+      })
+    }
+    if (isErr) return res.sendDataFtm(201, null, `此tag被${acticleName}文章唯一引用`)
+    TAG.findByIdAndDelete(id).exec((err, doc) => {
+      if (err) return res.sendDataFtm(201, null, 'tag删除失败')
+      res.sendDataFtm(200)
+    })
+  })
 }

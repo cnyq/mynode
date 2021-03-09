@@ -40,6 +40,13 @@ exports.sendData = (code, data = null, msg = '') => {
         msg: msg || 'success'
       }
       break;
+    case 201:
+      obj = {
+        code: 201,
+        data: data,
+        msg: msg || 'error'
+      }
+      break;
     case 400:
       obj = {
         code: 400,
