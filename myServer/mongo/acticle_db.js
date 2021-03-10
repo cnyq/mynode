@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const Validator = require('validator');
 
 // const tagCode = new Schema({
 //   code: {
@@ -16,6 +17,13 @@ const acticle_db = new Schema({
   name: {
     type: String,
     required: true
+  },
+  username: {
+    type: String
+  },
+  publishStatus: {
+    type: Number,
+    default: 0
   },
   synopsis: {
     type: String,
@@ -39,6 +47,28 @@ const acticle_db = new Schema({
 
 //查询方法
 acticle_db.statics = {
+  validatorData(data) {
+    return new Promise((res, rej) => {
+      if (!Validator.isLength(data.name, { min: 2, max: 30 })) {
+        return res("文章名称的长度不能小于2位并且不能大于30位！")
+      }
+      if(Validator.isEmpty(data.name)){
+        return res("文章名称不能为空！")
+      }
+      if(Validator.isEmpty(data.synopsis)){
+        return res("文章简介不能为空！")
+      }
+      if(Validator.isEmpty(data.author)){
+        return res("文章作者不能为空！")
+      }
+      if(JSON.stringify(data.tag) != '[]' || data.tag.length == 0){
+        return res("文章标签不能为空！")
+      }
+      if(JSON.stringify(data.tagCode) != '[]' || data.tagCode.length == 0){
+        return res("文章标签code不能为空！")
+      }
+    })
+  },
   // fetch(query, cb) {
   //   let pageSize = parseInt(query.pageSize),
   //     pageNum = parseInt(query.pageNum),

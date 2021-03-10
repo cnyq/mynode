@@ -17,6 +17,7 @@
     "http-errors": "^1.8.0",
     "jsonwebtoken": "^8.5.1",
     "marked": "^1.2.7",
-    "mongoose": "^5.10.15"
+    "mongoose": "^5.10.15",
+    "validator": "^13.5.2"
   }
 }
