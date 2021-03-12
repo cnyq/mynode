@@ -21,10 +21,12 @@ const acticle_db = new Schema({
   username: {
     type: String
   },
+  //发布状态
   publishStatus: {
     type: Number,
     default: 0
   },
+  //简介
   synopsis: {
     type: String,
     required: true
@@ -35,6 +37,7 @@ const acticle_db = new Schema({
   },
   tag: [{ type: mongoose.Schema.Types.ObjectId, ref: 'tag_db' }],
   mdInfo: { type: mongoose.Schema.Types.ObjectId, ref: 'acticle_html_db' },
+  //用于查询,单纯的关联tag有问题
   tagCode: [],
   create_time: {
     type: Number
@@ -42,7 +45,8 @@ const acticle_db = new Schema({
   writing_time: {
     type: Number
   },
-  banner: []
+  banner: [],
+  acticleImgs: []
 })
 
 //查询方法
@@ -52,21 +56,25 @@ acticle_db.statics = {
       if (!Validator.isLength(data.name, { min: 2, max: 30 })) {
         return res("文章名称的长度不能小于2位并且不能大于30位！")
       }
-      if(Validator.isEmpty(data.name)){
+      if (Validator.isEmpty(data.name)) {
         return res("文章名称不能为空！")
       }
-      if(Validator.isEmpty(data.synopsis)){
+      if (Validator.isEmpty(data.synopsis)) {
         return res("文章简介不能为空！")
       }
-      if(Validator.isEmpty(data.author)){
+      if (Validator.isEmpty(data.author)) {
         return res("文章作者不能为空！")
       }
-      if(JSON.stringify(data.tag) != '[]' || data.tag.length == 0){
+      if (JSON.stringify(data.tag) == '[]' || !data.tag) {
         return res("文章标签不能为空！")
       }
-      if(JSON.stringify(data.tagCode) != '[]' || data.tagCode.length == 0){
+      if (JSON.stringify(data.tagCode) == '[]' || !data.tagCode) {
         return res("文章标签code不能为空！")
       }
+      if (JSON.stringify(data.mdInfo) == '{}' || !data.tagCode._id) {
+        return res("关联文章为必传")
+      }
+      res("")
     })
   },
   // fetch(query, cb) {

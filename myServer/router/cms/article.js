@@ -11,29 +11,37 @@ module.exports = function (router) {
       .catch(e => res.status(500).send('server error.'))
   })
   router.post('/acticleAdd', async (req, res) => {
+    //权限
     let token = req.cookies['token'], isAuth = false
     await authUser(token, 2).then(it => {
       isAuth = it
     })
     if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
-    let _data = req.body
+    //字段
+    let _data = req.body, isValidator = ''
+    await ACTICLE.validatorData(_data).then(it=>{
+      isValidator = it
+    })
+    console.log(isValidator)
+    if (isValidator) return res.sendDataFtm(500, null, isValidator)
+    
     let idArr = _data.tag.map(it => it._id)
     _data.tag = idArr
     _data.code = getCode()
-    let artId = ''
+    let acticleId = ''
     await new ACTICLE(_data).save().then(it => {
-      artId = it._id
+      acticleId = it._id
     })
     await TAG.find({ _id: { $in: idArr } }, async (err, docs) => {
       if (err) return res.status(500).send('server error.')
       for (const item of docs) {
-        item.acticle.push(artId)
+        item.acticle.push(acticleId)
         await item.save()
       }
     })
     await ACTICLEHTML.findById(_data.mdInfo._id, (err, docs) => {
       if (err) return res.status(500).send('server error.')
-      docs.acticle = artId
+      docs.acticle = acticleId
       docs.save()
     })
 
