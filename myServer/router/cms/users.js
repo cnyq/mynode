@@ -86,11 +86,11 @@ module.exports = function (router) {
   })
 
   router.post('/userAdd', async (req, res) => {
-    let token = req.cookies['token'], isAuth = false
+    let token = req.cookies['token'], authUsername = false
     await authUser(token, 1).then(it => {
-      isAuth = it
+      authUsername = it
     })
-    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
+    if (!authUsername) return res.sendDataFtm(500, null, '权限不足')
     let { username, password, auth_status } = req.body
     findUser(username).then(data => {
       if (data) {
@@ -115,11 +115,11 @@ module.exports = function (router) {
     })
   })
   router.post('/userEdit', async (req, res) => {
-    let token = req.cookies['token'], isAuth = false
+    let token = req.cookies['token'], authUsername = false
     await authUser(token, 1).then(it => {
-      isAuth = it
+      authUsername = it
     })
-    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
+    if (!authUsername) return res.sendDataFtm(500, null, '权限不足')
     let { username, password, auth_status } = req.body
     findUser(username).then(data => {
       if (!data) {
@@ -146,11 +146,11 @@ module.exports = function (router) {
     })
   })
   router.post('/userDel', async (req, res) => {
-    let token = req.cookies['token'], isAuth = false
+    let token = req.cookies['token'], authUsername = false
     await authUser(token, 1).then(it => {
-      isAuth = it
+      authUsername = it
     })
-    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
+    if (!authUsername) return res.sendDataFtm(500, null, '权限不足')
     let { username, auth_status } = req.body
     findUser(username).then(data => {
       if (!data) {

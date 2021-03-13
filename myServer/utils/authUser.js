@@ -27,9 +27,9 @@ const authUser = (token, auth) => {
     if (!username) return res(false)
     findUser(username, auth).then(it => {
       if (it) {
-        res(true)
+        res(username)
       } else {
-        res(false)
+        res("")
       }
     })
   })

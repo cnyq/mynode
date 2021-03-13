@@ -24,7 +24,7 @@ const acticle_db = new Schema({
   //发布状态
   publishStatus: {
     type: Number,
-    default: 0
+    default: 2
   },
   //简介
   synopsis: {
@@ -71,7 +71,7 @@ acticle_db.statics = {
       if (JSON.stringify(data.tagCode) == '[]' || !data.tagCode) {
         return res("文章标签code不能为空！")
       }
-      if (JSON.stringify(data.mdInfo) == '{}' || !data.tagCode._id) {
+      if (JSON.stringify(data.mdInfo) == '{}' || !data.mdInfo._id) {
         return res("关联文章为必传")
       }
       res("")
@@ -127,10 +127,13 @@ acticle_db.statics = {
   findCommon(query, cb) {
     let name = query.name || '',
       author = query.author || '',
+      username = query.username || '',
       startTime = query.startTime || '',
       endTime = query.endTime || '',
       tagArr = query.tag ? query.tag.split(',') : '',
+      publishStatus = query.publishStatus,
       regName = new RegExp(name, 'i'),
+      regUsername = new RegExp(username, 'i'),
       regAuthor = new RegExp(author, 'i'),
       findCondition = []
     if (name) {
@@ -138,6 +141,9 @@ acticle_db.statics = {
     }
     if (author) {
       findCondition.push({ 'author': { "$regex": regAuthor } })
+    }
+    if (username) {
+      findCondition.push({ 'author': { "$regex": regUsername } })
     }
     if (startTime) {
       findCondition.push({ 'writing_time': { "$gt": startTime } })
@@ -149,7 +155,12 @@ acticle_db.statics = {
       let tagMap = tagArr.map(value => ({ "$elemMatch": { 'code': parseInt(value) } }));
       findCondition.push({ 'tagCode': { "$all": tagMap } })
     }
-
+    if (endTime) {
+      findCondition.push({ 'writing_time': { "$lte": endTime } })
+    }
+    if (publishStatus && publishStatus != -1) {
+      findCondition.push({ 'publishStatus': publishStatus })
+    }
     let findArr
     // console.log(JSON.stringify(findCondition))
     if (findCondition.length == 0) {

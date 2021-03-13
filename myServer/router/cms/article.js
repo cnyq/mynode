@@ -12,22 +12,26 @@ module.exports = function (router) {
   })
   router.post('/acticleAdd', async (req, res) => {
     //权限
-    let token = req.cookies['token'], isAuth = false
+    let token = req.cookies['token'], authUsername = ""
     await authUser(token, 2).then(it => {
-      isAuth = it
+      authUsername = it
     })
-    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
-    //字段
+    if (!authUsername) return res.sendDataFtm(500, null, '权限不足')
+    //校验字段
     let _data = req.body, isValidator = ''
     await ACTICLE.validatorData(_data).then(it=>{
       isValidator = it
     })
-    console.log(isValidator)
     if (isValidator) return res.sendDataFtm(500, null, isValidator)
+    if (authUsername != _data.username) return res.sendDataFtm(500, null, '管路员用户不匹配')
     
+    console.log('authUsername',authUsername)
     let idArr = _data.tag.map(it => it._id)
     _data.tag = idArr
     _data.code = getCode()
+    _data.username = authUsername
+    _data.publishStatus = 2
+    
     let acticleId = ''
     await new ACTICLE(_data).save().then(it => {
       acticleId = it._id
@@ -56,13 +60,12 @@ module.exports = function (router) {
     })
   })
   router.post('/acticleEdit', async (req, res) => {
-    let token = req.cookies['token'], isAuth = false
+    let token = req.cookies['token'], authUsername = ""
     await authUser(token, 2).then(it => {
-      isAuth = it
+      authUsername = it
     })
-    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
+    if (!authUsername) return res.sendDataFtm(500, null, '权限不足')
     let id = req.body._id
-    // console.log(req.body)
     let oldTagArr = [],
       newTagArr = req.body.tag.map(it => (it._id.toString()))
     await ACTICLE.findById(id, (err, data) => {
@@ -95,11 +98,11 @@ module.exports = function (router) {
     })
   })
   router.post('/acticleDel', async (req, res) => {
-    let token = req.cookies['token'], isAuth = false
+    let token = req.cookies['token'], authUsername = ""
     await authUser(token, 2).then(it => {
-      isAuth = it
+      authUsername = it
     })
-    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
+    if (!authUsername) return res.sendDataFtm(500, null, '权限不足')
     let id = req.body._id, findTagArr = [], isErr = false, mdInfo = ''
     await ACTICLE.findById(id, (err, data) => {
       if (err || !data) return isErr = true
@@ -139,11 +142,11 @@ module.exports = function (router) {
       .catch(e => res.status(500).send('server error.'))
   })
   router.post('/tagAdd', async (req, res) => {
-    let token = req.cookies['token'], isAuth = false
+    let token = req.cookies['token'], authUsername = ""
     await authUser(token, 1).then(it => {
-      isAuth = it
+      authUsername = it
     })
-    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
+    if (!authUsername) return res.sendDataFtm(500, null, '权限不足')
     let _data = req.body
     console.log('_data', _data)
     if (!_data.name) {
@@ -170,11 +173,11 @@ module.exports = function (router) {
     }
   })
   router.post('/tagDel', async (req, res) => {
-    let token = req.cookies['token'], isAuth = false
+    let token = req.cookies['token'], authUsername = ""
     await authUser(token, 1).then(it => {
-      isAuth = it
+      authUsername = it
     })
-    if (!isAuth) return res.sendDataFtm(500, null, '权限不足')
+    if (!authUsername) return res.sendDataFtm(500, null, '权限不足')
     let id = req.body._id, findActicleArr = [], isErr = false
     await TAG.findById(id, (err, data) => {
       if (err || !data) return isErr = true
